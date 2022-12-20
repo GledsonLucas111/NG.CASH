@@ -1,10 +1,11 @@
 import { UserDataBase } from "../data/UserDataBase";
 import { CustomError } from "../error/CustomError";
+import { Transaction } from "../models/Transaction";
 import { User } from "../models/User";
 import { Authenticator } from "../services/Authenticator";
 import { HashManager } from "../services/HashManager";
 import { IdGenerator } from "../services/IdGenerator";
-import { userDTO } from "../types/user";
+import { transactionDTO, userDTO, userTransaction } from "../types/user";
 
 export class UserBusiness {
   constructor(
@@ -45,10 +46,6 @@ export class UserBusiness {
     const user: User = new User(id, userName, hashPassword);
 
     await this.userDataBase.insert(user);
-
-    const accessToken = this.authenticator.generateToken({ id });
-
-    return accessToken;
   };
 
   login = async (input: userDTO) => {
@@ -79,7 +76,57 @@ export class UserBusiness {
     const tokenLogin = this.authenticator.generateToken({
       id: findUserByUserName.id,
     });
-
     return tokenLogin;
+  };
+
+  user = async (token: string) => {
+    if (!token) {
+      throw new CustomError(422, "Necessita de um token.");
+    }
+
+    const decodedToken = this.authenticator.getTokenData(token);
+
+    if (!decodedToken.id) {
+      throw new CustomError(400, "Token invalido.");
+    }
+
+    const user = await this.userDataBase.findById(decodedToken.id);
+
+    return user;
+  };
+
+  transaction = async (input: transactionDTO) => {
+    const { userName, token, value } = input;
+    if (!userName) {
+      throw new CustomError(422, "Necessita de um userName.");
+    }
+    if (!token) {
+      throw new CustomError(422, "Necessita de um token.");
+    }
+    if (!value) {
+      throw new CustomError(422, "Necessita de um value.");
+    }
+
+    const decodedToken = this.authenticator.getTokenData(token);
+
+    const debitedAccount: userTransaction = await this.userDataBase.findById(decodedToken.id);
+
+    const creditedAccount: userTransaction = await this.userDataBase.findByUserName(userName);
+
+    if (Number(value) > debitedAccount.account.balance) {
+      throw new CustomError(400, "Saldo insuficiente.");
+    }
+
+    const transactionInfo: Transaction = new Transaction(
+      debitedAccount.account.id,
+      creditedAccount.account.id,
+      Number(value)
+    );
+
+    await this.userDataBase.transaction(
+      transactionInfo,
+      debitedAccount,
+      creditedAccount
+    );
   };
 }

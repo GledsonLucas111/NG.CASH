@@ -24,17 +24,17 @@ model Accounts {
   balance Float  @default(100)
 
   user               User[]
-  debitedTransitions  Transitions[] @relation("debitedId")
-  creditedTransitions Transitions[] @relation("creditedId")
+  debitedTransactions  Transactions[] @relation("debitedId")
+  creditedTransactions Transactions[] @relation("creditedId")
 }
 
-model Transitions {
+model Transactions {
   id                String   @id @default(cuid())
   debitedAccountId  String
   creditedAccountId String
   value             Float
   createdAt         DateTime @default(now())
 
-  debitedAccount  Accounts @relation(name: "debitedId", fields: [debitedAccountId], references: [id])
-  creditedAccount Accounts @relation(name: "creditedId", fields: [creditedAccountId], references: [id])
+  debitedAccount  Accounts @relation(name: "debitedId", fields: [debitedAccountId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  creditedAccount Accounts @relation(name: "creditedId", fields: [creditedAccountId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 }

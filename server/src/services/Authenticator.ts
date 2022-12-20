@@ -22,7 +22,7 @@ export class Authenticator {
     return jwt.verify(
       token,
       process.env.JWT_KEY as string
-    ) as authenticationData;
+    ) as authenticationData;;
   };
 
 }

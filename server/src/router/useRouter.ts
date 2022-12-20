@@ -9,7 +9,6 @@ import { IdGenerator } from "../services/IdGenerator";
 export const userRouter = express.Router();
 
 const userBusiness = new UserBusiness(
-
   new UserDataBase(),
   new HashManager(),
   new Authenticator(),
@@ -21,4 +20,9 @@ const userController = new UserController(userBusiness);
 userRouter.post("/signup", userController.signup);
 
 userRouter.post("/login", userController.login);
+
+userRouter.get("/", userController.user);
+
+userRouter.post("/transaction", userController.transaction);
+
 

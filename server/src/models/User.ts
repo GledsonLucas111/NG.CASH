@@ -2,7 +2,7 @@ export class User {
   constructor(
     private id: string,
     private userName: string,
-    private password: string,
+    private password: string
   ) {}
 
   getId = (): string => {
@@ -16,5 +16,4 @@ export class User {
   getPassword = (): string => {
     return this.password;
   };
-
 }
