@@ -21,8 +21,11 @@ userRouter.post("/signup", userController.signup);
 
 userRouter.post("/login", userController.login);
 
-userRouter.get("/", userController.user);
+userRouter.get("/user", userController.user);
 
 userRouter.post("/transaction", userController.transaction);
+
+userRouter.get("/transaction/historic", userController.historicTransaction);
+
 
 

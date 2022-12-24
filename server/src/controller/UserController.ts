@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { UserBusiness } from "../business/UserBusiness";
 import { CustomError } from "../error/CustomError";
-import { transactionDTO, userDTO } from "../types/user";
+import { filterDTO, transactionDTO, userDTO } from "../types/user";
 
 export class UserController {
   constructor(private userBusiness: UserBusiness) {}
@@ -66,7 +66,26 @@ export class UserController {
 
       await this.userBusiness.transaction(input);
 
-      res.status(200).send({ message: "Dinheiro enviado com sucesso!" });
+      res.status(200).send({ message: "Transferência realizada com sucesso!" });
+    } catch (e) {
+      if (e instanceof CustomError) {
+        res.status(e.statusCode).send(e.message);
+      } else if (e instanceof Error) {
+        res.status(400).send(e.message);
+      }
+    }
+  };
+  historicTransaction = async (req: Request, res: Response) => {
+    try {
+      const token = req.headers.authorization as string;
+      const filter: filterDTO = {
+        date: req.body.date as string,
+        transact: req.query.transact as string,
+      }
+
+      const result = await this.userBusiness.historicTransaction(token, filter);
+      
+      res.status(200).send(result);
     } catch (e) {
       if (e instanceof CustomError) {
         res.status(e.statusCode).send(e.message);

@@ -5,7 +5,12 @@ import { User } from "../models/User";
 import { Authenticator } from "../services/Authenticator";
 import { HashManager } from "../services/HashManager";
 import { IdGenerator } from "../services/IdGenerator";
-import { transactionDTO, userDTO, userTransaction } from "../types/user";
+import {
+  filterDTO,
+  transactionDTO,
+  userDTO,
+  userTransaction,
+} from "../types/user";
 
 export class UserBusiness {
   constructor(
@@ -109,12 +114,21 @@ export class UserBusiness {
 
     const decodedToken = this.authenticator.getTokenData(token);
 
-    const debitedAccount: userTransaction = await this.userDataBase.findById(decodedToken.id);
+    const debitedAccount: userTransaction = await this.userDataBase.findById(
+      decodedToken.id
+    );
 
-    const creditedAccount: userTransaction = await this.userDataBase.findByUserName(userName);
+    const creditedAccount: userTransaction =
+      await this.userDataBase.findByUserName(userName);
 
     if (Number(value) > debitedAccount.account.balance) {
       throw new CustomError(400, "Saldo insuficiente.");
+    }
+    if (userName === debitedAccount.userName) {
+      throw new CustomError(
+        400,
+        "Não é possível realizar um transferência para você mesmo."
+      );
     }
 
     const transactionInfo: Transaction = new Transaction(
@@ -128,5 +142,26 @@ export class UserBusiness {
       debitedAccount,
       creditedAccount
     );
+  };
+
+  historicTransaction = async (token: string, filter: filterDTO) => {
+    if (!token) {
+      throw new CustomError(422, "Necessita de token.");
+    }
+
+    const decodedToken = this.authenticator.getTokenData(token);
+
+    const userAccount = await this.userDataBase.findById(decodedToken.id);
+    
+    const result = await this.userDataBase.historicTransaction(
+      userAccount.account.id,
+      filter
+    );
+
+    if (result === undefined) {
+      throw new CustomError(404, "Transação não encontrada");
+    }
+
+    return result;
   };
 }

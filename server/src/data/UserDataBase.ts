@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { Account } from "../models/Account";
 import { Transaction } from "../models/Transaction";
 import { User } from "../models/User";
-import { userTransaction } from "../types/user";
+import { filterDTO, userTransaction } from "../types/user";
 
 const prisma = new PrismaClient();
 
@@ -104,6 +104,57 @@ export class UserDataBase extends PrismaClient {
           balance: creditedAccount.account.balance + transact.value,
         },
       });
+    } catch (e: any) {
+      throw new Error(e.sqlMessage || e.message);
+    }
+  };
+
+  public historicTransaction = async (id: string, filter: filterDTO) => {
+    try {
+      const { date, transact } = filter;
+
+      const historic: any = await prisma.transactions.findMany({
+        where: {
+          ...(transact?.toLowerCase() === "out"
+            ? { debitedAccountId: id }
+            : transact?.toLowerCase() === "in"
+            ? { creditedAccountId: id }
+            : {
+                OR: [
+                  {
+                    debitedAccountId: id,
+                  },
+                  {
+                    creditedAccountId: id,
+                  },
+                ],
+              }),
+          ...(date
+            ? {
+                OR: [
+                  {
+                    createdAt: {
+                      gte: new Date(date as string),
+                    },
+                  },
+                ],
+              }
+            : {}),
+        },
+        select: {
+          ...(transact?.toLowerCase() === "out"
+            ? { debitedAccountId: true, value: true, createdAt: true }
+            : transact?.toLowerCase() === "in"
+            ? { creditedAccountId: true, value: true, createdAt: true }
+            : {
+                debitedAccountId: true,
+                creditedAccountId: true,
+                value: true,
+                createdAt: true,
+              }),
+        },
+      });
+      return historic;
     } catch (e: any) {
       throw new Error(e.sqlMessage || e.message);
     }

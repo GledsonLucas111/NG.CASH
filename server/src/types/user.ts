@@ -26,3 +26,7 @@ export type userTransaction = {
     }
 }
 
+export type filterDTO = {
+    date: string,
+    transact: string,
+}
