@@ -11,7 +11,9 @@ como: Prisma e Docker.
 ## Rotas do projeto
 * Cadastro
 * Login
-* 
+* Pegar usuário
+* Realizar transações
+* Pegar histórico de transação
 
 ## Inicializar projeto
 
