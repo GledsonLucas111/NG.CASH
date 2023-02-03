@@ -15,8 +15,6 @@ como: Prisma e Docker.
 * Realizar transações
 * Pegar histórico de transação
 
-## Inicializar projeto
-
 ## Techs
 - Node.js
 - express
