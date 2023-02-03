@@ -1,5 +1,8 @@
 ## NG CASH
-- 
+- Esse foi um case desenvolvido pela empresa financeira NG.CASH. O intuito é fazer com que os
+usuários da NG pudessem criar suas contas, realizar login e fazer transferências entre si, isso
+utilizando várias regras de negócios. Neste projeto usei algumas tecnologia que nunca tive contato
+como: Prisma e Docker.
 
 ## Links
 
