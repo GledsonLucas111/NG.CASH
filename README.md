@@ -17,7 +17,8 @@
 - express
 - Typescript
 - Postman
-- 
+- Prisma
+- MySQL
 
 ## Inicializar projeto
 
